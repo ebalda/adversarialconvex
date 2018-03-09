@@ -40,19 +40,16 @@ To compute the fooling ratio using the pretrained models use `main.py`. For exam
 ```
 python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.1
 ```
-![figures](fig_fcnn_1024_100.eps)
 ```
 python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.2
 ```
-![figures](fig_lenet_1024_200.eps)
 ```
 python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.03
 ```
-![figures](fig_nin_1024_30.eps)
 ```
 python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.01
 ```
-![figures](fig_densenet_1024_10.eps)
+![result](resultingfigures.png)
 
 These figures are stored in ./figures/ by default, the values that appear in these figrues are stored by default in ./results/ as csv files. To customize the loading/storing directories teake a look at 
 ```
@@ -62,13 +59,20 @@ python main.py --help
 ### Compute the robustness measures of a given classifier
 
 For this we can use the `--rho-mode` option of `main.py`. For example:
-
-``
+```
 python main.py --rho-mode --model2load=fcnn --n-images=2048
+```
+```
 python main.py --rho-mode --model2load=lenet --n-images=2048
+```
+```
 python main.py --rho-mode --model2load=nin --n-images=2048
+```
+or
+```
 python main.py --rho-mode --model2load=densenet --n-images=2048
-``
+```
+
 The obtained values of the robustness metrics are stored in ./results/ by default. 
 
 ### Get example images
