@@ -1,0 +1,2 @@
+model_checkpoint_path: "fcnn.ckpt"
+all_model_checkpoint_paths: "fcnn.ckpt"

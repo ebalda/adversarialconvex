@@ -1,0 +1,4 @@
+../results/fool_summary_densenet_1024_10.csv
+../results/fool_summary_fcnn_1024_100.csv
+../results/fool_summary_lenet_1024_200.csv
+../results/fool_summary_nin_1024_30.csv
