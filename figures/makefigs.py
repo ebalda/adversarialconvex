@@ -19,7 +19,7 @@ def save_foolratio_fig(X, fname, fool_dict, legend=True):
     if legend==True:
         ax.legend(['DeepFool', 'Alg 2', 'Alg 1', 'FastGrad', 'random'], fontsize=16)
     ax.tick_params(axis='both', labelsize='large')
-    plt.savefig( fname, format='eps', dpi=500 )
+    plt.savefig( fname, format='jpg', dpi=500 )
 
 
 fool_dict = {'epsilon':0, 'FGS':1, 'Alg1':2, 'Alg2':3, 'rand':4, 'DeepFool':5}
@@ -36,5 +36,5 @@ with open(fname) as f:
 
 		line = lines[ii].split('\n')[0]
 		X = np.loadtxt(line, delimiter=";")
-		save_foolratio_fig(X, 'fig'+ line.split('summary')[1].split('.')[0]+'.eps', 
+		save_foolratio_fig(X, 'fig'+ line.split('summary')[1].split('.')[0]+'.jpg', 
 			fool_dict, legend=legend)
