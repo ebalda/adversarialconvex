@@ -1,12 +1,12 @@
 # Generating Adversarial Examples using Convex Programming in tensorflow
-This repository contains the tensorflow implementation our paper [here](http://arxiv.org/).
+This repository contains the tensorflow implementation our paper [here](https://arxiv.org/abs/1803.03607).
 
 Citation:
 
-     @inproceedings{balda2017,
-          title={something},
-          author={Balda },
-          booktitle={Axiv},
+     @article{balda2017adversarialconvex,
+          title={On Generation of Adversarial Examples using Convex Programming},
+          author={Balda, Emilio Rafael and Behboodi, Arash and Mathar, Rudolf },
+          journal={arXiv preprint 	arXiv:1803.03607},
           year={2017}
       }
 
