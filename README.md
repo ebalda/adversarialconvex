@@ -19,8 +19,8 @@ Citation:
 
 For benchmarking we use the following pre-trained models and datasets:
 
-* **MNIST dataset**: A fully connected network with two hidden layers of size $150$ and $100$ respectively (test error = 1.7\%), as well as the LeNet-$5$ architecture (test error = 0.9\%).
-* **CIFAR-10 dataset**:  The Network In Network (NIN) architecture (test error = 13.8\%), and a $40$ layer DenseNet (test error = 5.2\%).
+* **MNIST dataset**: A fully connected network with two hidden layers of size 150 and 100 respectively (test error = 1.7\%), as well as the LeNet-5 architecture (test error = 0.9\%).
+* **CIFAR-10 dataset**:  The Network In Network (NIN) architecture (test error = 13.8\%), and a 40 layer DenseNet (test error = 5.2\%).
 
 ## Usage
 
