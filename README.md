@@ -1,5 +1,5 @@
 # Generating Adversarial Examples using Convex Programming in tensorflow
-This repository contains the tensorflow implementation our paper [here](https://arxiv.org/abs/1803.03607).
+This repository contains the tensorflow implementation our paper: [On Generation of Adversarial Examples using Convex Programming](https://arxiv.org/abs/1803.03607).
 
 Citation:
 
