@@ -58,7 +58,7 @@ python main.py --help
 
 ### Compute the robustness measures of a given classifier
 
-For this we can use the `--rho-mode` option of `main.py`. For example:
+For this use the `--rho-mode` option of `main.py`. For example:
 ```
 python main.py --rho-mode --model2load=fcnn --n-images=2048
 ```
@@ -77,7 +77,7 @@ The obtained values of the robustness metrics are stored in ./results/ by defaul
 
 ### Get example images
 
-To add example images into ./examples/ `get_example_images.py`. See 
+To add example images into ./examples/ you may use `get_example_images.py`. See 
 ``
 python get_example_images.py --help 
 ``
