@@ -41,13 +41,13 @@ To compute the fooling ratio using the pretrained models use `main.py`. For exam
 python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.1
 ```
 ```
-python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.2
+python main.py --model2load=lenet --n-images=1024 --max-epsilon=0.2
 ```
 ```
-python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.03
+python main.py --model2load=nin --n-images=1024 --max-epsilon=0.03
 ```
 ```
-python main.py --model2load=fcnn --n-images=1024 --max-epsilon=0.01
+python main.py --model2load=densenet --n-images=1024 --max-epsilon=0.01
 ```
 ![result](resultingfigures.png)
 
