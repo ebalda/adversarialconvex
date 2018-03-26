@@ -190,7 +190,7 @@ def FastGrad(dX, epsilon):
     return -epsilon * np.sign(dX)
 
 def get_adversarial_noise(X, ypred, epsilon, modelvarnames,
-                          method='FGS'):
+                          method='FGS', iterations=1):
     if method=='rand':
         return epsilon * np.sign(np.random.randn(X.shape[0], X.shape[1], X.shape[2], X.shape[3]))
     
@@ -234,20 +234,25 @@ def get_adversarial_noise(X, ypred, epsilon, modelvarnames,
 
         if method == 'Alg1':
             dX_y = np.zeros(X.shape)
+            N = np.zeros(X.shape)
             for i in range(X.shape[0]):
-                dX, fY = sess.run([grad, Ylogits], feed_dict={Xtrue: np.array([X[i, :, :, :]]), pkeep:1.0})
+                XX = X[i,:,:,:]
+                for n in range(iterations):
+                    dX, fY = sess.run([grad, Ylogits], feed_dict={Xtrue: np.array([XX]), pkeep:1.0})
 
-                tmp_norm = float('Inf')
-                l = -1
-                for j in range(10):
-                    tmp = (fY[:, ypred[i]] - fY[:, j]) - epsilon * np.abs(
-                        dX[ypred[i], :, :, :, :] - dX[j, :, :, :, :]).sum()
-                    if j != ypred[i] and tmp < tmp_norm:
-                        tmp_norm = tmp
-                        l = j
+                    tmp_norm = float('Inf')
+                    l = -1
+                    for j in range(10):
+                        tmp = (fY[:, ypred[i]] - fY[:, j]) - epsilon/iterations * np.abs(
+                            dX[ypred[i], :, :, :, :] - dX[j, :, :, :, :]).sum()
+                        if j != ypred[i] and tmp < tmp_norm:
+                            tmp_norm = tmp
+                            l = j
 
-                dX_y[i, :, :, :] = dX[ypred[i], :, :, :, :] - dX[l, :, :, :, :]
-            N = FastGrad(dX_y, epsilon)
+                    dX_y[i, :, :, :] = dX[ypred[i], :, :, :, :] - dX[l, :, :, :, :]
+
+                    N[i, :, :, :] = N[i, :, :, :] + FastGrad(dX_y[i, :, :, :], epsilon/iterations)
+                    XX = X[i,:,:,:] + N[i, :, :, :]
         elif method == 'FGS':
             dX_y = np.zeros(X.shape)
             for i in range(X.shape[0]):
@@ -265,8 +270,9 @@ def get_adversarial_noise(X, ypred, epsilon, modelvarnames,
 
     return N
 
-def get_foolratio(X, y, epsilon, modelvarnames, method='FGS'):
-    N = get_adversarial_noise(X, y, epsilon, modelvarnames, method=method)
+def get_foolratio(X, y, epsilon, modelvarnames,
+                  method='FGS', iterations=1):
+    N = get_adversarial_noise(X, y, epsilon, modelvarnames, method=method, iterations=iterations)
     y_adv, y_conf = predict_CNN(X + N, modelvarnames)
     return np.mean(y != y_adv)
 
@@ -277,6 +283,7 @@ def get_deepfool_ellenorms(X, ypred, modelvarnames,
     # Parameters taken from --> https://github.com/LTS4/universal/blob/master/python/deepfool.py
     elle_norms = np.zeros(X.shape[0])
     fooled_vec = np.zeros(X.shape[0])
+    iterations_vec = np.zeros(X.shape[0])
 
 
     config = tf.ConfigProto(allow_soft_placement=True)
@@ -333,8 +340,9 @@ def get_deepfool_ellenorms(X, ypred, modelvarnames,
                     fooled_vec[i] = 1
                     break
             elle_norms[i] = np.max(np.abs(N).flatten())
+            iterations_vec[i] = n
 
-    return elle_norms, fooled_vec
+    return elle_norms, fooled_vec, iterations_vec
 
 
 def get_robustness_metrics(X, ypred, elle_norms, fooled_vec, modelvarnames,
@@ -417,19 +425,23 @@ def get_robustness_metrics(X, ypred, elle_norms, fooled_vec, modelvarnames,
 
 def save_foolratio_fig(X, fname, fool_dict, legend=True):
     epsilon = X[:,fool_dict['epsilon']]
+    fig = plt.figure()
     ax = plt.subplot(111)
     ax.plot(epsilon, X[:, fool_dict['DeepFool']] * 100., '-ro', markersize=8)
+    ax.plot(epsilon, X[:, fool_dict['Alg1-10']] * 100., '--bx')
+    ax.plot(epsilon, X[:, fool_dict['Alg1-5']] * 100., '-.bx')
     ax.plot(epsilon, X[:, fool_dict['Alg1']] * 100., '-bx', markersize=10)
     ax.plot(epsilon, X[:, fool_dict['Alg2']] * 100., '-g*', markersize=10)
     ax.plot(epsilon, X[:,fool_dict['FGS']]*100., '-ms')
     ax.plot(epsilon, X[:, fool_dict['rand']] * 100., '-^k')
+
 
     plt.xlabel('epsilon', fontsize=16)
     plt.ylabel('Fooling Ratio (in %)', fontsize=16)
     ax.grid()
     plt.ylim((-5,105))
     if legend==True:
-        ax.legend(['DeepFool', 'Alg 2', 'Alg 1', 'FastGrad', 'random'], fontsize=16)
+        ax.legend(['DeepFool', 'Alg1 (10 its)', 'Alg1 (5 its)', 'Alg1', 'Alg2', 'FastGrad', 'random'], fontsize=16)
     ax.tick_params(axis='both', labelsize='large')
     plt.savefig( fname, format='eps', dpi=500 )
 
@@ -464,9 +476,10 @@ def main():
     eps_rescale = np.max(np.abs( np.max(X.flatten()) -  np.min(X.flatten()) ))
 
 
-    deepfool_norms, deepfooled_vec = get_deepfool_ellenorms(X, y, allvars)
+    deepfool_norms, deepfooled_vec, deepfool_its = get_deepfool_ellenorms(X, y, allvars)
     print('DeepFool fooling ratio: '+str(np.mean(deepfooled_vec)*100)+' %')
     print('DeepFool mean epsilon: '+str(np.mean(deepfool_norms[deepfooled_vec==1])/eps_rescale))
+    print('DeepFool mean iterations: ' + str(np.mean(deepfool_its[deepfooled_vec == 1])))
 
     if args.rho_mode:
         print('Computing performance metrics...')
@@ -491,7 +504,7 @@ def main():
         print()
 
         epsilon = np.array(np.linspace(0.001, allvars['max_epsilon'], 10))
-        fool_dict = {'epsilon': 0, 'FGS': 1, 'Alg1': 2, 'Alg2': 3, 'rand': 4, 'DeepFool': 5}
+        fool_dict = {'epsilon': 0, 'FGS': 1, 'Alg1': 2, 'Alg2': 3, 'rand': 4, 'DeepFool': 5, 'Alg1-5':6, 'Alg1-10':7}
         fool_mtx = np.zeros([len(epsilon), len(fool_dict)])
 
         for i in range(len(epsilon)):
@@ -500,10 +513,12 @@ def main():
 
             fool_mtx[i, fool_dict['epsilon']]	= epsilon[i]
             fool_mtx[i, fool_dict['FGS']]		= get_foolratio(X, y, eps, allvars, method='FGS')
-            fool_mtx[i, fool_dict['Alg1']]		= get_foolratio(X, y, eps, allvars, method='Alg1')
+            fool_mtx[i, fool_dict['Alg1']]		= get_foolratio(X, y, eps, allvars, method='Alg1', iterations=1)
             fool_mtx[i, fool_dict['Alg2']]		= get_foolratio(X, y, eps, allvars, method='Alg2')
             fool_mtx[i, fool_dict['rand']]		= get_foolratio(X, y, eps, allvars, method='rand')
             fool_mtx[i, fool_dict['DeepFool']]	= np.mean(np.array((deepfool_norms<eps) * (deepfooled_vec==1)))
+            fool_mtx[i, fool_dict['Alg1-5']]    = get_foolratio(X, y, eps, allvars, method='Alg1', iterations=5)
+            fool_mtx[i, fool_dict['Alg1-10']]   = get_foolratio(X, y, eps, allvars, method='Alg1', iterations=10)
 
         np.savetxt(allvars['output_dir']+'fool_summary_' + allvars['model2load'] +'_' +str(allvars['n_images'])+\
                    '_'+str(int(allvars['max_epsilon']*1000))+'.csv', fool_mtx, delimiter=";")
