@@ -3,12 +3,14 @@ This repository contains the tensorflow implementation of our paper: [On Generat
 
 Citation:
 
-     @article{balda2017adversarialconvex,
-          title={On Generation of Adversarial Examples using Convex Programming},
-          author={Balda, Emilio Rafael and Behboodi, Arash and Mathar, Rudolf},
-          journal={arXiv preprint	arXiv:1803.03607},
-          year={2018}
-      }
+     @INPROCEEDINGS{balda2018adversarialconvex,
+       title={On Generation of Adversarial Examples using Convex Programming},
+       author={Emilio Rafael Balda  and Arash Behboodi and Rudolf Mathar},
+       booktitle={52th Asilomar Conference on Signals, Systems, and Computers},
+       year={2018},
+       month={Oct},
+       organization={IEEE}
+     } 
 
 ## Dependencies:
 
